@@ -1,14 +1,63 @@
-from erpnext.selling.doctype.quotation.quotation import Quotation
 import frappe
 from frappe import whitelist
 from frappe.utils import flt, nowdate, getdate, cint
 from frappe.model.mapper import get_mapped_doc
-from frappe.contacts.doctype.address.address import get_company_address
-from erpnext.selling.doctype.quotation.quotation import _make_customer
-from frappe.model.utils import get_fetch_values
-from erpnext.accounts.party import get_party_account
-from erpnext.stock.doctype.item.item import get_item_defaults
-from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+
+
+def _coerce_customer(customer):
+	if not customer:
+		return None
+
+	if isinstance(customer, str):
+		if frappe.db.exists("Customer", customer):
+			return frappe.get_doc("Customer", customer)
+		return None
+
+	if getattr(customer, "doctype", None) == "Customer":
+		return customer
+
+	return None
+
+
+def _resolve_customer(source_name, ignore_permissions=False):
+	customer = None
+
+	try:
+		from erpnext.selling.doctype.quotation.quotation import _make_customer
+
+		customer = _make_customer(source_name, ignore_permissions)
+	except Exception:
+		customer = None
+
+	customer = _coerce_customer(customer)
+	if customer:
+		return customer
+
+	quotation = frappe.db.get_value(
+		"Quotation",
+		source_name,
+		["quotation_to", "party_name", "lead"],
+		as_dict=1,
+	) or frappe._dict()
+
+	customer_candidates = []
+	if quotation.quotation_to == "Customer" and quotation.party_name:
+		customer_candidates.append(quotation.party_name)
+
+	if quotation.lead:
+		lead_customer = frappe.db.get_value("Lead", quotation.lead, "customer")
+		if lead_customer:
+			customer_candidates.append(lead_customer)
+
+		customer_from_lead = frappe.db.get_value("Customer", {"lead_name": quotation.lead}, "name")
+		if customer_from_lead:
+			customer_candidates.append(customer_from_lead)
+
+	for customer_name in customer_candidates:
+		if frappe.db.exists("Customer", customer_name):
+			return frappe.get_doc("Customer", customer_name)
+
+	return None
 
 @frappe.whitelist()
 def make_sales_order(source_name: str, target_doc=None):
@@ -27,7 +76,7 @@ def make_sales_order(source_name: str, target_doc=None):
 
 
 def _make_sales_order(source_name, target_doc=None, customer_group=None, ignore_permissions=False):
-	customer = _make_customer(source_name, ignore_permissions)
+	customer = _resolve_customer(source_name, ignore_permissions)
 	ordered_items = frappe._dict(
 		frappe.db.get_all(
 			"Sales Order Item",
@@ -44,6 +93,7 @@ def _make_sales_order(source_name, target_doc=None, customer_group=None, ignore_
 		if customer:
 			target.customer = customer.name
 			target.customer_name = customer.customer_name
+
 		if source.referral_sales_partner:
 			target.sales_partner = source.referral_sales_partner
 			target.commission_rate = frappe.get_value(
@@ -51,7 +101,7 @@ def _make_sales_order(source_name, target_doc=None, customer_group=None, ignore_
 			)
 
 		# sales team
-		if not target.get("sales_team"):
+		if customer and not target.get("sales_team"):
 			for d in customer.get("sales_team") or []:
 				target.append(
 					"sales_team",
@@ -130,6 +180,10 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 			target.set_advances()
 
 	def set_missing_values(source, target):
+		from frappe.contacts.doctype.address.address import get_company_address
+		from frappe.model.utils import get_fetch_values
+		from erpnext.accounts.party import get_party_account
+
 		target.flags.ignore_permissions = True
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
@@ -152,6 +206,9 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		target.debit_to = get_party_account("Customer", source.customer, source.company)
 
 	def update_item(source, target, source_parent):
+		from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+		from erpnext.stock.doctype.item.item import get_item_defaults
+
 		target.amount = flt(source.amount) - flt(source.billed_amt)
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)
 		target.qty = (

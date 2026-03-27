@@ -4,7 +4,7 @@ app_publisher = "administrator"
 app_description = "SNRG"
 app_email = "hello@aerele.in"
 app_license = "mit"
-# required_apps = []
+required_apps = ["erpnext", "india_compliance"]
 
 # Includes in <head>
 # ------------------
@@ -140,17 +140,23 @@ doctype_js = {
 # }
 doc_events = {
     "Customer": {
-        "before_save": "snrg.snrg.doctype.counter.counter.insert_or_update_document",
-        "before_save": "snrg.doc_events.validate_gstin",
+        "before_save": [
+            "snrg.snrg.doctype.counter.counter.insert_or_update_document",
+            "snrg.doc_events.validate_gstin",
+        ],
     },
     "Lead": {
-        "before_save": "snrg.snrg.doctype.counter.counter.insert_or_update_document",
-        "before_save": "snrg.doc_events.validate_gstin",
+        "before_save": [
+            "snrg.snrg.doctype.counter.counter.insert_or_update_document",
+            "snrg.doc_events.validate_gstin",
+        ],
         "on_update": "snrg.doc_events.create_address"
     },
     "Secondary Customer": {
-        "before_save": "snrg.snrg.doctype.counter.counter.insert_or_update_document",
-        "before_save": "snrg.doc_events.validate_gstin",
+        "before_save": [
+            "snrg.snrg.doctype.counter.counter.insert_or_update_document",
+            "snrg.doc_events.validate_gstin",
+        ],
         "on_update": "snrg.doc_events.create_address_and_contact"
     },
     "Supplier": {
@@ -260,4 +266,3 @@ override_whitelisted_methods = {
 # default_log_clearing_doctypes = {
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
-
