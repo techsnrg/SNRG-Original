@@ -1,0 +1,192 @@
+{
+ "custom_fields": [
+  {
+   "dt": "Quotation Item",
+   "fetch_from": "item_code.gst_hsn_code",
+   "fieldname": "gst_hsn_code",
+   "fieldtype": "Data",
+   "insert_after": "description",
+   "label": "HSN/SAC"
+  },
+  {
+   "dt": "Quotation Item",
+   "fetch_from": "item_tax_template.gst_treatment",
+   "fieldname": "gst_treatment",
+   "fieldtype": "Autocomplete",
+   "insert_after": "item_tax_template",
+   "label": "GST Treatment",
+   "read_only": 1
+  },
+  {
+   "dt": "Quotation Item",
+   "fieldname": "taxable_value",
+   "fieldtype": "Currency",
+   "insert_after": "base_net_amount",
+   "label": "Taxable Value",
+   "read_only": 1
+  },
+  {
+   "dt": "Quotation Item",
+   "fieldname": "gst_details_section",
+   "fieldtype": "Section Break",
+   "insert_after": "taxable_value",
+   "label": "GST Details"
+  },
+  {
+   "dt": "Quotation Item",
+   "fieldname": "igst_rate",
+   "fieldtype": "Float",
+   "insert_after": "gst_details_section",
+   "label": "IGST Rate",
+   "read_only": 1
+  },
+  {
+   "dt": "Quotation Item",
+   "fieldname": "cgst_rate",
+   "fieldtype": "Float",
+   "insert_after": "igst_rate",
+   "label": "CGST Rate",
+   "read_only": 1
+  },
+  {
+   "dt": "Quotation Item",
+   "fieldname": "sgst_rate",
+   "fieldtype": "Float",
+   "insert_after": "cgst_rate",
+   "label": "SGST Rate",
+   "read_only": 1
+  },
+  {
+   "dt": "Quotation Item",
+   "fieldname": "cess_rate",
+   "fieldtype": "Float",
+   "insert_after": "sgst_rate",
+   "label": "CESS Rate",
+   "read_only": 1
+  },
+  {
+   "dt": "Quotation Item",
+   "fieldname": "cess_non_advol_rate",
+   "fieldtype": "Float",
+   "insert_after": "cess_rate",
+   "label": "CESS Non Advol Rate",
+   "read_only": 1
+  },
+  {
+   "dt": "Quotation Item",
+   "fieldname": "cb_gst_details",
+   "fieldtype": "Column Break",
+   "insert_after": "cess_non_advol_rate"
+  },
+  {
+   "dt": "Quotation Item",
+   "fieldname": "igst_amount",
+   "fieldtype": "Currency",
+   "insert_after": "cb_gst_details",
+   "label": "IGST Amount",
+   "read_only": 1
+  },
+  {
+   "dt": "Quotation Item",
+   "fieldname": "cgst_amount",
+   "fieldtype": "Currency",
+   "insert_after": "igst_amount",
+   "label": "CGST Amount",
+   "read_only": 1
+  },
+  {
+   "dt": "Quotation Item",
+   "fieldname": "sgst_amount",
+   "fieldtype": "Currency",
+   "insert_after": "cgst_amount",
+   "label": "SGST Amount",
+   "read_only": 1
+  },
+  {
+   "dt": "Quotation Item",
+   "fieldname": "cess_amount",
+   "fieldtype": "Currency",
+   "insert_after": "sgst_amount",
+   "label": "CESS Amount",
+   "read_only": 1
+  },
+  {
+   "dt": "Quotation Item",
+   "fieldname": "cess_non_advol_amount",
+   "fieldtype": "Currency",
+   "insert_after": "cess_amount",
+   "label": "CESS Non Advol Amount",
+   "read_only": 1
+  }
+ ],
+ "custom_perms": [],
+ "doctype": "Quotation Item",
+ "links": [],
+ "property_setters": [
+  {
+   "doc_type": "Quotation Item",
+   "doctype_or_field": "DocField",
+   "field_name": "discount_percentage",
+   "property": "in_list_view",
+   "property_type": "Check",
+   "value": "1"
+  },
+  {
+   "doc_type": "Quotation Item",
+   "doctype_or_field": "DocField",
+   "field_name": "discount_percentage",
+   "property": "columns",
+   "property_type": "Int",
+   "value": "1"
+  },
+  {
+   "doc_type": "Quotation Item",
+   "doctype_or_field": "DocField",
+   "field_name": "price_list_rate",
+   "property": "in_list_view",
+   "property_type": "Check",
+   "value": "1"
+  },
+  {
+   "doc_type": "Quotation Item",
+   "doctype_or_field": "DocField",
+   "field_name": "price_list_rate",
+   "property": "columns",
+   "property_type": "Int",
+   "value": "1"
+  },
+  {
+   "doc_type": "Quotation Item",
+   "doctype_or_field": "DocField",
+   "field_name": "uom",
+   "property": "in_list_view",
+   "property_type": "Check",
+   "value": "1"
+  },
+  {
+   "doc_type": "Quotation Item",
+   "doctype_or_field": "DocField",
+   "field_name": "uom",
+   "property": "columns",
+   "property_type": "Int",
+   "value": "1"
+  },
+  {
+   "doc_type": "Quotation Item",
+   "doctype_or_field": "DocField",
+   "field_name": "item_name",
+   "property": "in_list_view",
+   "property_type": "Check",
+   "value": "1"
+  },
+  {
+   "doc_type": "Quotation Item",
+   "doctype_or_field": "DocField",
+   "field_name": "item_name",
+   "property": "columns",
+   "property_type": "Int",
+   "value": "2"
+  }
+ ],
+ "sync_on_migrate": 1
+}

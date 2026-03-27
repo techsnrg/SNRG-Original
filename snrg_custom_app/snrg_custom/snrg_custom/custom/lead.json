@@ -1,0 +1,113 @@
+{
+ "custom_fields": [
+  {
+   "dt": "Lead",
+   "fieldname": "custom_gstin",
+   "fieldtype": "Data",
+   "insert_after": "column_break_1",
+   "label": "GSTIN"
+  },
+  {
+   "dt": "Lead",
+   "fetch_from": "lead_owner.full_name",
+   "fieldname": "custom_lead_owner_name",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "insert_after": "lead_owner",
+   "label": "Lead Owner Name"
+  }
+ ],
+ "custom_perms": [],
+ "doctype": "Lead",
+ "links": [],
+ "property_setters": [
+  {
+   "doc_type": "Lead",
+   "doctype_or_field": "DocField",
+   "field_name": "mobile_no",
+   "property": "unique",
+   "property_type": "Check",
+   "value": "1"
+  },
+  {
+   "doc_type": "Lead",
+   "doctype_or_field": "DocField",
+   "field_name": "mobile_no",
+   "property": "allow_in_quick_entry",
+   "property_type": "Check",
+   "value": "1"
+  },
+  {
+   "doc_type": "Lead",
+   "doctype_or_field": "DocField",
+   "field_name": "source",
+   "property": "allow_in_quick_entry",
+   "property_type": "Check",
+   "value": "1"
+  },
+  {
+   "doc_type": "Lead",
+   "doctype_or_field": "DocField",
+   "field_name": "state",
+   "property": "allow_in_quick_entry",
+   "property_type": "Check",
+   "value": "1"
+  },
+  {
+   "doc_type": "Lead",
+   "doctype_or_field": "DocField",
+   "field_name": "city",
+   "property": "allow_in_quick_entry",
+   "property_type": "Check",
+   "value": "1"
+  },
+  {
+   "doc_type": "Lead",
+   "doctype_or_field": "DocField",
+   "field_name": "company_name",
+   "property": "allow_in_quick_entry",
+   "property_type": "Check",
+   "value": "1"
+  },
+  {
+   "doc_type": "Lead",
+   "doctype_or_field": "DocField",
+   "field_name": "last_name",
+   "property": "allow_in_quick_entry",
+   "property_type": "Check",
+   "value": "1"
+  },
+  {
+   "doc_type": "Lead",
+   "doctype_or_field": "DocField",
+   "field_name": "first_name",
+   "property": "allow_in_quick_entry",
+   "property_type": "Check",
+   "value": "1"
+  },
+  {
+   "doc_type": "Lead",
+   "doctype_or_field": "DocType",
+   "property": "quick_entry",
+   "property_type": "Check",
+   "value": "1"
+  },
+  {
+   "doc_type": "Lead",
+   "doctype_or_field": "DocField",
+   "field_name": "country",
+   "property": "default",
+   "property_type": "Text",
+   "value": "India"
+  },
+  {
+   "doc_type": "Lead",
+   "doctype_or_field": "DocField",
+   "field_name": "request_type",
+   "property": "default",
+   "property_type": "Text",
+   "value": "Product Enquiry"
+  }
+ ],
+ "sync_on_migrate": 1
+}

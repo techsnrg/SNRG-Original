@@ -1,0 +1,108 @@
+{
+ "custom_fields": [
+  {
+   "dt": "Quotation",
+   "fieldname": "po_no",
+   "fieldtype": "Data",
+   "insert_after": "customer_address",
+   "label": "Customer's Purchase Order",
+   "no_copy": 1,
+   "print_hide": 1
+  },
+  {
+   "depends_on": "eval:doc.po_no",
+   "dt": "Quotation",
+   "fieldname": "po_date",
+   "fieldtype": "Date",
+   "insert_after": "po_no",
+   "label": "Customer's Purchase Order Date ",
+   "allow_on_submit": 1
+  },
+  {
+   "default": "0",
+   "dt": "Quotation",
+   "fieldname": "is_reverse_charge",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "insert_after": "customer_name",
+   "label": "Is Reverse Charge"
+  },
+  {
+   "dt": "Quotation",
+   "fieldname": "section_gst_breakup",
+   "fieldtype": "Section Break",
+   "insert_after": "other_charges_calculation",
+   "label": "GST Breakup"
+  },
+  {
+   "dt": "Quotation",
+   "fieldname": "gst_breakup_table",
+   "fieldtype": "Text Editor",
+   "insert_after": "section_gst_breakup",
+   "label": "GST Breakup Table",
+   "read_only": 1
+  },
+  {
+   "dt": "Quotation",
+   "fetch_from": "company_address.gstin",
+   "fieldname": "company_gstin",
+   "fieldtype": "Data",
+   "insert_after": "company_address",
+   "label": "Company GSTIN",
+   "read_only": 1
+  },
+  {
+   "dt": "Quotation",
+   "fetch_from": "customer_address.gstin",
+   "fieldname": "billing_address_gstin",
+   "fieldtype": "Data",
+   "insert_after": "address_display",
+   "label": "Billing Address GSTIN",
+   "read_only": 1
+  },
+  {
+   "dt": "Quotation",
+   "fetch_from": "customer_address.gst_category",
+   "fieldname": "gst_category",
+   "fieldtype": "Data",
+   "insert_after": "billing_address_gstin",
+   "label": "GST Category",
+   "read_only": 1
+  },
+  {
+   "dt": "Quotation",
+   "fieldname": "place_of_supply",
+   "fieldtype": "Autocomplete",
+   "insert_after": "gst_category",
+   "label": "Place of Supply"
+  },
+  {
+   "dt": "Quotation",
+   "fieldname": "is_export_with_gst",
+   "fieldtype": "Check",
+   "insert_after": "is_reverse_charge",
+   "label": "Is Export With GST"
+  },
+  {
+   "dt": "Quotation",
+   "fetch_from": "shipping_address_name.custom_incoterm",
+   "fieldname": "custom_incoterms",
+   "fieldtype": "Data",
+   "insert_after": "shipping_address",
+   "label": "Incoterms",
+   "read_only": 1
+  },
+  {
+   "dt": "Quotation",
+   "fieldname": "custom_additionals",
+   "fieldtype": "Tab Break",
+   "insert_after": "connections_tab",
+   "label": "Additionals"
+  }
+ ],
+ "custom_perms": [],
+ "doctype": "Quotation",
+ "links": [],
+ "property_setters": [],
+ "sync_on_migrate": 1
+}

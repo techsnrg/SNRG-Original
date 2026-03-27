@@ -1,0 +1,138 @@
+{
+ "custom_fields": [
+  {
+   "dt": "Sales Order",
+   "fieldname": "transporter",
+   "fieldtype": "Link",
+   "insert_after": "shipping_address_name",
+   "label": "Transporter",
+   "options": "Supplier"
+  },
+  {
+   "dt": "Sales Order",
+   "fetch_from": "customer.custom_mobile_number",
+   "fetch_if_empty": 1,
+   "fieldname": "custom_mobile_number",
+   "fieldtype": "Read Only",
+   "insert_after": "contact_person",
+   "label": "Mobile Number"
+  },
+  {
+   "default": "0",
+   "dt": "Sales Order",
+   "fieldname": "is_reverse_charge",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "insert_after": "skip_delivery_note",
+   "label": "Is Reverse Charge"
+  },
+  {
+   "dt": "Sales Order",
+   "fieldname": "section_gst_breakup",
+   "fieldtype": "Section Break",
+   "insert_after": "other_charges_calculation",
+   "label": "GST Breakup"
+  },
+  {
+   "dt": "Sales Order",
+   "fieldname": "gst_breakup_table",
+   "fieldtype": "Text Editor",
+   "insert_after": "section_gst_breakup",
+   "label": "GST Breakup Table",
+   "read_only": 1
+  },
+  {
+   "dt": "Sales Order",
+   "fetch_from": "company_address.gstin",
+   "fieldname": "company_gstin",
+   "fieldtype": "Data",
+   "insert_after": "company_address",
+   "label": "Company GSTIN",
+   "read_only": 1
+  },
+  {
+   "dt": "Sales Order",
+   "fetch_from": "customer_address.gstin",
+   "fieldname": "billing_address_gstin",
+   "fieldtype": "Data",
+   "insert_after": "address_display",
+   "label": "Billing Address GSTIN",
+   "read_only": 1
+  },
+  {
+   "dt": "Sales Order",
+   "fetch_from": "customer_address.gst_category",
+   "fieldname": "gst_category",
+   "fieldtype": "Data",
+   "insert_after": "billing_address_gstin",
+   "label": "GST Category",
+   "read_only": 1
+  },
+  {
+    "dt": "Sales Order",
+    "fieldname": "place_of_supply",
+    "fieldtype": "Autocomplete",
+    "insert_after": "gst_category",
+    "label": "Place of Supply"
+  },
+  {
+   "dt": "Sales Order",
+   "fieldname": "ecommerce_gstin",
+   "fieldtype": "Data",
+   "insert_after": "place_of_supply",
+   "label": "E-Commerce GSTIN"
+  },
+  {
+   "dt": "Sales Order",
+   "fieldname": "is_export_with_gst",
+   "fieldtype": "Check",
+   "insert_after": "is_reverse_charge",
+   "label": "Is Export With GST"
+  },
+  {
+   "dt": "Sales Order",
+   "fetch_from": "shipping_address_name.custom_incoterm",
+   "fieldname": "custom_incoterms",
+   "fieldtype": "Data",
+   "insert_after": "place_of_supply",
+   "label": "Incoterms",
+   "read_only": 1
+  },
+  {
+   "dt": "Sales Order",
+   "fieldname": "custom_additional_fields",
+   "fieldtype": "Section Break",
+   "insert_after": "custom_mobile_number",
+   "label": "Additional Fields"
+  },
+  {
+   "dt": "Sales Order",
+   "fieldname": "custom_additionals",
+   "fieldtype": "Tab Break",
+   "insert_after": "connections_tab",
+   "label": "Additionals"
+  }
+ ],
+ "custom_perms": [],
+ "doctype": "Sales Order",
+ "links": [],
+ "property_setters": [
+  {
+   "doc_type": "Sales Order",
+   "doctype_or_field": "DocField",
+   "field_name": "delivery_date",
+   "property": "reqd",
+   "property_type": "Check",
+   "value": "1"
+  },
+  {
+   "doc_type": "Sales Order",
+   "doctype_or_field": "DocField",
+   "field_name": "set_warehouse",
+   "property": "fetch_from",
+   "property_type": "Small Text",
+   "value": "company_address.custom_cost_center"
+  }
+ ],
+ "sync_on_migrate": 1
+}
