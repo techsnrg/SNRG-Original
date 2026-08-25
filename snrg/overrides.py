@@ -81,7 +81,7 @@ def _make_sales_order(source_name, target_doc=None, customer_group=None, ignore_
 		frappe.db.get_all(
 			"Sales Order Item",
 			{"prevdoc_docname": source_name, "docstatus": 1},
-			["item_code", "sum(qty)"],
+			["item_code", {"SUM": "qty", "as": "ordered_qty"}],
 			group_by="item_code",
 			as_list=1,
 		)
