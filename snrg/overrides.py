@@ -1,7 +1,9 @@
+import json
+
 import frappe
-from frappe import whitelist
-from frappe.utils import flt, nowdate, getdate, cint
+from frappe import _, whitelist
 from frappe.model.mapper import get_mapped_doc
+from frappe.utils import cint, flt, getdate, nowdate
 
 
 def _coerce_customer(customer):
@@ -59,8 +61,9 @@ def _resolve_customer(source_name, ignore_permissions=False):
 
 	return None
 
+
 @frappe.whitelist()
-def make_sales_order(source_name: str, target_doc=None):
+def make_sales_order(source_name: str, target_doc=None, args=None):
 	if not frappe.db.get_singles_value(
 		"Selling Settings", "allow_sales_order_creation_for_expired_quotation"
 	):
@@ -70,29 +73,49 @@ def make_sales_order(source_name: str, target_doc=None):
 		if quotation.valid_till and (
 			quotation.valid_till < quotation.transaction_date or quotation.valid_till < getdate(nowdate())
 		):
-			frappe.throw(("Validity period of this quotation has ended."))
+			frappe.throw(_("Validity period of this quotation has ended."))
 
-	return _make_sales_order(source_name, target_doc)
+	return _make_sales_order(source_name, target_doc, args=args)
 
 
-def _make_sales_order(source_name, target_doc=None, customer_group=None, ignore_permissions=False):
+def _make_sales_order(source_name, target_doc=None, ignore_permissions=False, args=None):
+	if args is None:
+		args = {}
+	if isinstance(args, str):
+		args = json.loads(args)
+
 	customer = _resolve_customer(source_name, ignore_permissions)
 	ordered_items = frappe._dict(
-		frappe.db.get_all(
-			"Sales Order Item",
-			{"prevdoc_docname": source_name, "docstatus": 1},
-			["item_code", {"SUM": "qty", "as": "ordered_qty"}],
-			group_by="item_code",
-			as_list=1,
+		frappe.get_all(
+			"Quotation Item",
+			{"docstatus": 1, "parent": source_name, "ordered_qty": (">", 0)},
+			["name", "ordered_qty"],
+			as_list=True,
 		)
 	)
 
 	selected_rows = [x.get("name") for x in frappe.flags.get("args", {}).get("selected_items", [])]
+	has_unit_price_items = frappe.db.get_value("Quotation", source_name, "has_unit_price_items")
+
+	def is_unit_price_row(source) -> bool:
+		return has_unit_price_items and source.qty == 0
 
 	def set_missing_values(source, target):
 		if customer:
 			target.customer = customer.name
 			target.customer_name = customer.customer_name
+
+			# sales team
+			if not target.get("sales_team"):
+				for d in customer.get("sales_team") or []:
+					target.append(
+						"sales_team",
+						{
+							"sales_person": d.sales_person,
+							"allocated_percentage": d.allocated_percentage or None,
+							"commission_rate": d.commission_rate,
+						},
+					)
 
 		if source.referral_sales_partner:
 			target.sales_partner = source.referral_sales_partner
@@ -100,27 +123,15 @@ def _make_sales_order(source_name, target_doc=None, customer_group=None, ignore_
 				"Sales Partner", source.referral_sales_partner, "commission_rate"
 			)
 
-		# sales team
-		if customer and not target.get("sales_team"):
-			for d in customer.get("sales_team") or []:
-				target.append(
-					"sales_team",
-					{
-						"sales_person": d.sales_person,
-						"allocated_percentage": d.allocated_percentage or None,
-						"commission_rate": d.commission_rate,
-					},
-				)
-
 		target.flags.ignore_permissions = ignore_permissions
 		target.delivery_date = nowdate()
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(obj, target, source_parent):
-		balance_qty = obj.qty - ordered_items.get(obj.item_code, 0.0)
-		target.qty = balance_qty if balance_qty > 0 else 0
-		target.stock_qty = flt(target.qty) * flt(obj.conversion_factor)
+		balance_stock_qty = obj.stock_qty - ordered_items.get(obj.name, 0.0)
+		target.stock_qty = balance_stock_qty if balance_stock_qty > 0 else 0
+		target.qty = flt(target.stock_qty) / flt(obj.conversion_factor)
 
 		if obj.against_blanket_order:
 			target.against_blanket_order = obj.against_blanket_order
@@ -132,44 +143,57 @@ def _make_sales_order(source_name, target_doc=None, customer_group=None, ignore_
 		Row mapping from Quotation to Sales order:
 		1. If no selections, map all non-alternative rows (that sum up to the grand total)
 		2. If selections: Is Alternative Item/Has Alternative Item: Map if selected and adequate qty
-		3. If selections: Simple row: Map if adequate qty
+		3. If no selections: Simple row: Map if adequate qty
 		"""
-		has_qty = item.qty > 0
+		if not ((item.stock_qty > ordered_items.get(item.name, 0.0)) or is_unit_price_row(item)):
+			return False
 
 		if not selected_rows:
 			return not item.is_alternative
 
 		if selected_rows and (item.is_alternative or item.has_alternative_item):
-			return (item.name in selected_rows) and has_qty
+			return item.name in selected_rows
 
 		# Simple row
-		return has_qty
+		return True
+
+	def select_item(item):
+		filtered_items = args.get("filtered_children", [])
+		return item.name in filtered_items if filtered_items else True
+
+	automatically_fetch_payment_terms = cint(
+		frappe.get_single_value("Accounts Settings", "automatically_fetch_payment_terms")
+	)
 
 	doclist = get_mapped_doc(
 		"Quotation",
 		source_name,
 		{
-			"Quotation": {"doctype": "Sales Order",
-				 "field_map": {
-					"po_no":"po_no",
-					"transporter": "transporter"
-				}, "validation": {"docstatus": ["=", 1]}},
+			"Quotation": {
+				"doctype": "Sales Order",
+				"field_map": {"po_no": "po_no", "transporter": "transporter"},
+				"field_no_map": ["payment_terms_template"],
+				"validation": {"docstatus": ["=", 1]},
+			},
 			"Quotation Item": {
 				"doctype": "Sales Order Item",
 				"field_map": {"parent": "prevdoc_docname", "name": "quotation_item"},
 				"postprocess": update_item,
-				"condition": can_map_row,
+				"condition": lambda item: can_map_row(item) and select_item(item),
 			},
-			"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "add_if_empty": True},
+			"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "reset_value": True},
 			"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
-			"Payment Schedule": {"doctype": "Payment Schedule", "add_if_empty": True},
 		},
 		target_doc,
 		set_missing_values,
 		ignore_permissions=ignore_permissions,
 	)
 
+	if automatically_fetch_payment_terms:
+		doclist.set_payment_schedule()
+
 	return doclist
+
 
 @frappe.whitelist()
 def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
