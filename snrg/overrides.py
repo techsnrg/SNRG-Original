@@ -125,7 +125,19 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False, ar
 
 		target.flags.ignore_permissions = ignore_permissions
 		target.delivery_date = nowdate()
-		target.run_method("set_missing_values")
+
+		# Preserve the pricing agreed on the submitted Quotation. Sales Order's
+		# set_missing_values recalculates pricing rules for every mapped row and
+		# can replace the copied rules and rates with a currently matching rule.
+		mapped_pricing_rules = list(target.get("pricing_rules") or [])
+		ignore_pricing_rule = target.get("ignore_pricing_rule")
+		try:
+			target.ignore_pricing_rule = 1
+			target.run_method("set_missing_values")
+		finally:
+			target.ignore_pricing_rule = ignore_pricing_rule
+			target.set("pricing_rules", mapped_pricing_rules)
+
 		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(obj, target, source_parent):
