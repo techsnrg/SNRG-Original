@@ -6,6 +6,10 @@ app_email = "hello@aerele.in"
 app_license = "mit"
 required_apps = ["erpnext", "india_compliance"]
 
+# Opt-in routing for valuation jobs; requires the configured custom worker.
+before_job = ["snrg.repost_queue.configure_routing"]
+before_request = ["snrg.repost_queue.configure_routing"]
+
 # Includes in <head>
 # ------------------
 
