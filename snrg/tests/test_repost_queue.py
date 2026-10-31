@@ -100,6 +100,16 @@ class RepostQueueTests(unittest.TestCase):
         self.routing.enqueue_entry("riv-1")
         self.assertEqual(self.frappe.enqueue.call_args.kwargs["queue"], "valuation_repost_3")
 
+    def test_dispatch_reserves_queues_while_started_registry_lags(self):
+        self.enable_four_queues()
+        def dispatch():
+            for index in range(4):
+                self.routing.enqueue_entry(f"riv-{index}")
+        self.routing._ORIGINAL["run_parallel_reposting"].side_effect = dispatch
+        self.routing.run_dispatch()
+        self.assertEqual([call.kwargs["queue"] for call in self.frappe.enqueue.call_args_list], list(self.routing.QUEUE_POOL))
+        self.assertEqual(self.frappe.local.snrg_repost_reservations, {})
+
     def test_two_worker_fallback_excludes_extra_queues_for_new_jobs(self):
         self.enable_four_queues()
         self.frappe.db.get_single_value.return_value = 2

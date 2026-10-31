@@ -68,18 +68,24 @@ def run_dispatch():
     lock = frappe.cache.lock(f"snrg_repost_dispatch:{frappe.local.site}", timeout=1900)
     if not lock.acquire(blocking=False):
         return
+    frappe.local.snrg_repost_reservations = {}
     try:
         return _ORIGINAL["run_parallel_reposting"]()
     finally:
+        frappe.local.snrg_repost_reservations = {}
         lock.release()
 
 
 def enqueue_entry(name):
+    queue_name = select_queue()
+    reservations = getattr(frappe.local, "snrg_repost_reservations", None)
+    if reservations is not None:
+        reservations[queue_name] = reservations.get(queue_name, 0) + 1
     return frappe.enqueue(
         core.execute_reposting_entry,
         name=name,
         continue_reposting=True,
-        queue=select_queue(),
+        queue=queue_name,
         timeout=1800,
         job_id=f"{core.REPOSTING_JOB_ID_PREFIX}{name}",
         deduplicate=True,
@@ -111,5 +117,8 @@ def select_queue():
         raise RuntimeError("valuation_repost worker configuration is missing")
     def load(name):
         queue = get_queue(name)
-        return len(queue.get_job_ids()) + len(queue.started_job_registry.get_job_ids())
+        # A worker can dequeue a job before RQ publishes it in the started
+        # registry. Keep this dispatch's assignments visible through that gap.
+        reserved = (getattr(frappe.local, "snrg_repost_reservations", None) or {}).get(name, 0)
+        return len(queue.get_job_ids()) + len(queue.started_job_registry.get_job_ids()) + reserved
     return min(queues, key=load)
