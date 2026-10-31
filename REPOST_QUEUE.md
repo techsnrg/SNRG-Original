@@ -56,10 +56,10 @@ Never delete checkpoint files or manually set reposts Completed.
 
 `python3 -m unittest discover -s snrg/tests -p test_repost_queue.py -v`
 
-Thirteen tests cover per-site opt-in/restore, missing queue configuration,
+Sixteen tests cover per-site opt-in/restore, missing queue configuration,
 dispatcher isolation, original ledger executor and continuation arguments,
 stable deduplication IDs, old/new queue visibility, legacy batch exclusion,
-least-busy queue selection, dispatcher locking and two-worker/daytime fallback.
+least-busy queue selection, dispatcher locking, dequeue visibility gaps, soon-free worker selection and two-worker/daytime fallback.
 These are local contract tests; live deployment verification remains required.
 
 ## Capacity limits

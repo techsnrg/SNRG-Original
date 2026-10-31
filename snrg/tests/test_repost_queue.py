@@ -119,8 +119,27 @@ class RepostQueueTests(unittest.TestCase):
     def test_continuation_uses_worker_becoming_free(self):
         self.enable_four_queues()
         self.rq.get_current_job.return_value = SimpleNamespace(origin="bench:valuation_repost_4")
+        self.background.get_queue.return_value = SimpleNamespace(get_job_ids=lambda: [], started_job_registry=SimpleNamespace(get_job_ids=lambda: ["running"]))
         self.routing.enqueue_dispatch()
         self.assertEqual(self.frappe.enqueue.call_args.kwargs["queue"], "valuation_repost_4")
+
+    def test_dispatch_uses_own_soon_free_worker_instead_of_busy_peer(self):
+        self.enable_four_queues()
+        self.frappe.db.get_single_value.return_value = 2
+        self.rq.get_current_job.return_value = SimpleNamespace(origin="bench:valuation_repost_2")
+        self.background.get_queue.return_value = SimpleNamespace(get_job_ids=lambda: [], started_job_registry=SimpleNamespace(get_job_ids=lambda: ["running"]))
+        self.routing._ORIGINAL["run_parallel_reposting"].side_effect = lambda: self.routing.enqueue_entry("riv-next")
+        self.routing.run_dispatch()
+        self.assertEqual(self.frappe.enqueue.call_args.kwargs["queue"], "valuation_repost_2")
+
+    def test_continuation_avoids_own_queue_with_waiting_work(self):
+        self.enable_four_queues()
+        self.rq.get_current_job.return_value = SimpleNamespace(origin="bench:valuation_repost")
+        def queue(name):
+            return SimpleNamespace(get_job_ids=lambda: ["waiting"] if name == "valuation_repost" else [], started_job_registry=SimpleNamespace(get_job_ids=lambda: ["current"] if name == "valuation_repost" else []))
+        self.background.get_queue.side_effect = queue
+        self.routing.enqueue_dispatch()
+        self.assertEqual(self.frappe.enqueue.call_args.kwargs["queue"], "valuation_repost_2")
 
     def test_active_entries_still_include_extra_queues_at_daytime_cap(self):
         self.enable_four_queues()

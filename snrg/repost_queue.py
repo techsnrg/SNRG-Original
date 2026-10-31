@@ -38,18 +38,9 @@ def configure_routing(**kwargs):
 
 
 def enqueue_dispatch():
-    # A continuation should run on the worker that is about to become free,
-    # rather than wait behind a large repost on the first queue.
-    queue_name = select_queue()
-    current_job = get_current_job()
-    if current_job:
-        for name in configured_queues():
-            if current_job.origin.endswith(":" + name):
-                queue_name = name
-                break
     return frappe.enqueue(
         "snrg.repost_queue.run_dispatch",
-        queue=queue_name,
+        queue=select_queue(),
         timeout=1800,
         job_id="snrg_valuation_repost_dispatch",
         deduplicate=True,
@@ -115,10 +106,17 @@ def select_queue():
     queues = configured_queues()[: max(1, min(limit, len(QUEUE_POOL)))]
     if not queues:
         raise RuntimeError("valuation_repost worker configuration is missing")
+    current_job = get_current_job()
     def load(name):
         queue = get_queue(name)
         # A worker can dequeue a job before RQ publishes it in the started
         # registry. Keep this dispatch's assignments visible through that gap.
         reserved = (getattr(frappe.local, "snrg_repost_reservations", None) or {}).get(name, 0)
-        return len(queue.get_job_ids()) + len(queue.started_job_registry.get_job_ids()) + reserved
+        count = len(queue.get_job_ids()) + len(queue.started_job_registry.get_job_ids())
+        # The caller releases its worker before its enqueued work can run.
+        # Counting that caller makes a free-soon worker look as busy as a
+        # different worker running a long repost, creating queued work there.
+        if current_job and current_job.origin.endswith(":" + name):
+            count = max(0, count - 1)
+        return count + reserved
     return min(queues, key=load)
