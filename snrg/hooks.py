@@ -18,6 +18,7 @@ before_request = ["snrg.repost_queue.configure_routing"]
 # app_include_js = "/assets/snrg/js/snrg.js"
 
 app_include_js = "snrg.bundle.js"
+app_include_css = "snrg_form_layout.bundle.css"
 
 # include js, css files in header of web template
 # web_include_css = "/assets/snrg/css/snrg.css"
@@ -270,3 +271,4 @@ override_whitelisted_methods = {
 # default_log_clearing_doctypes = {
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
+
