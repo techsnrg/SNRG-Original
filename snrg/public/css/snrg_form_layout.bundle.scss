@@ -1,125 +1,86 @@
-/* Early Desk styles: only Quotation Details and Stock Entry Details. */
-#page-Quotation #quotation-__details .section-body,
-#page-Quotation #quotation-__details .section-head {
-  max-width: none;
-}
-#page-Quotation #quotation-__details .section-body {
-  padding-top: 8px;
-  padding-bottom: 4px;
-}
-#page-Quotation #quotation-__details .section-head {
-  padding: 10px 15px 4px;
-  font-size: 13px;
-  font-weight: 600;
-}
-#page-Quotation #quotation-__details .form-column > form {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-#page-Quotation #quotation-__details .form-column > form > .frappe-control {
-  margin-top: 0 !important;
-  margin-bottom: 0 !important;
-}
-#page-Quotation #quotation-__details .frappe-control > .form-group {
-  margin-bottom: 0;
-}
-#page-Quotation #quotation-__details .control-label {
-  font-size: 12px;
-  line-height: 18px;
-  margin-bottom: 4px;
-  color: var(--text-muted);
-}
-#page-Quotation #quotation-__details .frappe-control > .form-group > .clearfix > .control-label {
-  display: block;
-}
-#page-Quotation #quotation-__details [data-fieldname="customer_section"] {
-  padding-bottom: 8px;
-}
-#page-Quotation #quotation-__details [data-fieldname="items_section"] {
-  background: var(--subtle-fg, var(--control-bg));
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  margin: 4px 16px 8px;
-  padding: 0 4px;
-}
-#page-Quotation #quotation-__details [data-fieldname="items_section"] .section-body {
-  padding: 8px 0;
-}
-#page-Quotation #quotation-__details [data-fieldname="items_section"] .input-with-feedback {
-  background: var(--card-bg, var(--bg-color));
-}
-#page-Quotation #quotation-__details [data-fieldname="sec_break23"] {
-  border-top: 0;
-}
-#page-Quotation #quotation-__details [data-fieldname="items"] > .control-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-color);
-  margin-bottom: 6px;
-}
-#page-Quotation #quotation-__details [data-fieldname="items"] .grid-row .grid-static-col {
-  padding: 6px 8px;
-}
-#page-Quotation #quotation-__details [data-fieldname="items"] .grid-static-col[data-fieldname="item_code"] .static-area {
-  white-space: normal;
-  overflow-wrap: anywhere;
-  text-overflow: clip;
-  line-height: 1.4;
-}
-#page-Quotation #quotation-__details [data-fieldname="items"] .grid-heading-row .grid-static-col {
-  font-size: 12px;
-  font-weight: 600;
-}
-#page-Quotation #quotation-__details [data-fieldname="section_break_36"] .section-body {
-  padding-top: 8px;
-  padding-bottom: 8px;
-}
-#page-Quotation #quotation-__details [data-fieldname="section_break_36"] .control-value,
-#page-Quotation #quotation-__details [data-fieldname="totals"] .control-value {
-  background: transparent;
-  padding-left: 0;
-  font-variant-numeric: tabular-nums;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text-color);
-}
-#page-Quotation #quotation-__details [data-fieldname="taxes"] > .control-label {
-  display: none;
-}
-#page-Quotation #quotation-__details [data-fieldname="totals"] .section-body {
-  padding-top: 6px;
-  padding-bottom: 12px;
-}
-#page-Quotation #quotation-__details [data-fieldname="rounded_total"] .control-value {
-  font-size: 18px;
-  font-weight: 700;
-}
-#page-Quotation #quotation-__details [data-fieldname="section_break_39"] .section-body {
-  padding-top: 8px;
-  padding-bottom: 8px;
-}
-@media (min-width: 992px) {
-  #page-Quotation #quotation-__details [data-fieldname="customer_section"] > .section-body {
-    display: grid;
-    grid-template-columns: 1fr 1.18fr .9fr;
+/* Sales form layout is native: no delayed field moves or injected styles. */
+$forms: ("Quotation": "quotation-__details", "Sales Order": "sales-order-__details", "Sales Invoice": "sales-invoice-__details");
+@each $doctype, $details in $forms {
+ [id="page-#{$doctype}"] {
+  .tab-pane .section-body, .tab-pane .section-head {max-width:none;}
+  .tab-pane .section-body {padding-top:8px;padding-bottom:8px;}
+  .tab-pane .section-head {padding:10px 15px 4px;font-size:13px;font-weight:600;}
+  .tab-pane .control-label {font-size:12px;line-height:18px;margin-bottom:4px;}
+  ##{$details} {
+   .form-column > form {display:flex;flex-direction:column;gap:8px;}
+   .form-column > form > .frappe-control {margin-top:0!important;margin-bottom:0!important;}
+   .frappe-control > .form-group {margin-bottom:0;}
+   .form-column:not(:has(.frappe-control:not(.hide-control))) {display:none;}
+   .control-label {color:var(--text-muted);}
+   [data-fieldname="customer_section"] > .section-body {display:grid;grid-template-columns:1fr 1.18fr .9fr;gap:24px;padding:12px 15px 8px;}
+   [data-fieldname="customer_section"] > .section-body > .form-column {width:100%;max-width:none;min-width:0;padding:0;}
+   [data-fieldname="items_section"] {border-top:0;}
+   [data-fieldname="custom_snrg_order_strip"], &[id="quotation-__details"] [data-fieldname="items_section"] {background:var(--subtle-fg,var(--control-bg));border:1px solid var(--border-color);border-radius:8px;margin:0 15px 8px;padding:0 12px;}
+   [data-fieldname="custom_snrg_order_strip"] > .section-body, &[id="quotation-__details"] [data-fieldname="items_section"] > .section-body {display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px;padding:8px 0;}
+   [data-fieldname="custom_snrg_order_strip"] .form-column, &[id="quotation-__details"] [data-fieldname="items_section"] .form-column {width:100%;max-width:none;padding:0;}
+   [data-fieldname="custom_snrg_order_strip"] .input-with-feedback, &[id="quotation-__details"] [data-fieldname="items_section"] .input-with-feedback {background:var(--card-bg,var(--bg-color));}
+   [data-fieldname="custom_snrg_order_strip"] .help-box {font-size:11px;line-height:1.4;}
+   [data-fieldname="items"] .grid-static-col {padding:6px 8px;font-size:12px;}
+   [data-fieldname="items"] .grid-heading-row .grid-static-col {font-weight:600;}
+   [data-fieldname="items"] [data-fieldname="item_code"] .static-area {white-space:nowrap;}
+   [data-fieldname="items"] [data-fieldname="item_name"] .static-area {white-space:normal;overflow-wrap:anywhere;line-height:1.4;}
+   [data-fieldname="rounding_adjustment"] .control-value, [data-fieldname="in_words"] .control-value {font-size:12px!important;font-weight:400!important;color:var(--text-muted);}
+   &:not(:has([data-fieldname="disable_rounded_total"] input:checked)) [data-fieldname="rounded_total"], &:has([data-fieldname="disable_rounded_total"] input:checked) [data-fieldname="grand_total"] {border:1px solid var(--border-color);border-radius:8px;background:var(--subtle-fg);padding:8px 12px;}
+   &:not(:has([data-fieldname="disable_rounded_total"] input:checked)) [data-fieldname="rounded_total"] .control-value, &:has([data-fieldname="disable_rounded_total"] input:checked) [data-fieldname="grand_total"] .control-value {font-size:20px!important;font-weight:700!important;color:var(--text-color);background:transparent;padding-left:0;}
   }
-  #page-Quotation #quotation-__details [data-fieldname="customer_section"] > .section-body > .form-column {
-    width: 100%;
-    max-width: none;
-  }
+  .tab-pane [data-fieldname="terms_section_break"] .form-column:has([data-fieldname="terms"]) {flex:0 0 100%;max-width:100%;}
+  .tab-pane [data-fieldname="terms_section_break"] .form-column:not(:has(.frappe-control)) {display:none;}
+  .tab-pane [data-fieldname="terms"] .ql-editor {min-height:140px;max-height:260px;overflow-y:auto;}
+  .snrg-address-notices {margin:8px 15px;padding:8px 12px;border:1px solid var(--border-color);border-radius:8px;background:var(--subtle-fg);font-size:12px;gap:12px;align-items:center;}
+  .snrg-address-notices:not(:empty) {display:flex!important;}
+  .snrg-address-notices button {margin-left:auto;}
+ }
 }
-@media (min-width: 1440px) {
-  #page-Quotation #quotation-__details [data-fieldname="customer_section"] > .section-body > .form-column:nth-child(2) > form {
-    display: grid;
-    grid-template-columns: minmax(110px, .35fr) minmax(0, 1fr);
-    gap: 8px 12px;
-    align-content: start;
-  }
-  #page-Quotation #quotation-__details [data-fieldname="customer_address"],
-  #page-Quotation #quotation-__details [data-fieldname="custom_delay_reason"] {
-    grid-column: 1 / -1;
-  }
+@each $doctype, $section in ("Quotation":"section_break_36", "Sales Order":"section_break_40", "Sales Invoice":"section_break_40") {
+ [id="page-#{$doctype}"] .tab-pane [data-fieldname="#{$section}"] {
+  > .section-body {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 24px;}
+  > .section-body > .form-column, > .section-body > .form-column > form {display:contents!important;}
+  [data-fieldname="taxes"] {grid-column:1/-1;}
+  [data-fieldname="total_net_weight"] {grid-column:1;}
+  .control-value {background:transparent;padding-left:0;font-size:15px;font-weight:600;}
+ }
+}
+@each $doctype, $section in ("Quotation":"totals", "Sales Order":"section_break_43", "Sales Invoice":"base_totals_section") {
+ [id="page-#{$doctype}"] .tab-pane [data-fieldname="#{$section}"] {
+  > .section-body {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 24px;align-items:start;}
+  > .section-body > .form-column, > .section-body > .form-column > form {display:contents!important;}
+  [data-fieldname="grand_total"] {grid-column:1;grid-row:1;}
+  [data-fieldname="rounded_total"] {grid-column:2;grid-row:1;}
+  [data-fieldname="rounding_adjustment"] {grid-column:3;grid-row:1;}
+  [data-fieldname="advance_paid"] {grid-column:3;grid-row:2;}
+  [data-fieldname="disable_rounded_total"] {grid-column:1;grid-row:3;}
+  [data-fieldname="in_words"] {grid-column:2/-1;grid-row:3;}
+  .control-value {background:transparent;padding-left:0;font-weight:600;}
+ }
+}
+#page-Quotation #quotation-__details [data-fieldname="payment_terms_template"] {grid-column:1/-1;}
+@media(min-width:1440px) {
+ #page-Quotation #quotation-__details [data-fieldname="customer_section"] > .section-body > .form-column:nth-child(2) > form {display:grid;grid-template-columns:minmax(110px,.35fr) minmax(0,1fr);gap:8px 12px;align-content:start;}
+}
+/* Native checkbox stays in its original form column. It never inserts a row. */
+@each $doctype in ("Sales Invoice", "Stock Entry") {
+ [id="page-#{$doctype}"] .form-column > form:has(> [data-fieldname="posting_date"]) {
+  position:relative;
+  > [data-fieldname="posting_date"] > .form-group > .clearfix {min-height:22px;padding-right:52px;}
+  > [data-fieldname="set_posting_time"] {position:absolute;right:0;top:0;width:auto!important;max-width:none!important;min-height:20px;margin:0!important;padding:0!important;}
+  > [data-fieldname="set_posting_time"] .checkbox {margin:0!important;padding:0!important;line-height:18px;}
+  > [data-fieldname="set_posting_time"] .checkbox label {margin:0!important;font-size:12px;line-height:18px;white-space:nowrap;}
+  > [data-fieldname="set_posting_time"] .help-box {margin:0!important;}
+  > [data-fieldname="posting_date"] > .form-group > .control-input-wrapper > .control-value,
+  > [data-fieldname="posting_date"] > .form-group > .control-input-wrapper > .control-input {min-height:28px;}
+ }
+}
+@media(max-width:991px) {
+ @each $doctype, $details in $forms {
+  [id="page-#{$doctype}"] ##{$details} [data-fieldname="customer_section"] > .section-body {grid-template-columns:1fr;gap:12px;}
+  [id="page-#{$doctype}"] ##{$details} [data-fieldname="section_break_36"] > .section-body,
+  [id="page-#{$doctype}"] ##{$details} [data-fieldname="section_break_40"] > .section-body {grid-template-columns:1fr;}
+ }
 }
 
 /* Stock Entry: static placement; Frappe's depends_on controls visibility. */
@@ -141,3 +102,4 @@
   gap: 4px 16px;
   padding: 2px 0;
 }
+
